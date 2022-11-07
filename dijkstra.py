@@ -28,8 +28,8 @@ def find_router_for_ip(routers, ip):
             return ip_value
 
 def distance_to_neighbors(routers, current, neighbor):
-    cur_info = routers[current]
-    cur_connections = cur_info['connections']
+    cur = routers[current]
+    cur_connections = cur['connections']
     cur_neighbor = cur_connections[neighbor]
     n_dist = cur_neighbor['ad']
     return n_dist
