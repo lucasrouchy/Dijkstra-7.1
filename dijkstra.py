@@ -27,6 +27,13 @@ def find_router_for_ip(routers, ip):
         if ips_same_subnet(ip_value, ip, mask_value['netmask']):
             return ip_value
 
+def distance_to_neighbors(routers, cur, neighbor):
+    cur_info = routers[cur]
+    cur_connections = cur_info['connections']
+    cur_neighbor = cur_connections[neighbor]
+    n_dist = cur_neighbor['ad']
+    return n_dist
+
 def dijkstras_shortest_path(routers, src_ip, dest_ip):
     """
     This function takes a dictionary representing the network, a source
@@ -80,29 +87,46 @@ def dijkstras_shortest_path(routers, src_ip, dest_ip):
     function. Having it all built as a single wall of code is a recipe
     for madness.
     """
-    src_router = find_router_for_ip(routers, src_ip)
-    dest_router = find_router_for_ip(routers, dest_ip)
+    src_ip = find_router_for_ip(routers, src_ip)
+    dest_ip = find_router_for_ip(routers, dest_ip)
 
-    if ips_same_subnet(src_router, dest_router, '/24'):
-        return []
-
+    
     unvisited = set()
     dist = {}
     parent = {}  
 
-    for node in routers:
-        parent[node] = None
-        dist[node] = math.inf  
-        unvisited.add(node)
+    for r in routers:
+        parent[r] = None
+        dist[r] = math.inf  
+        unvisited.add(r)
     
-    dist[src_router] = 0
-    while len(unvisited) !=0:
-        cur = next(iter(unvisited))
-        for node in unvisited:
-            if dist[node] < dist[cur]:
-                cur = node
+    dist[src_ip] = 0
+
+    while unvisited:
+
+        cur = min(unvisited, key=dist.get)
         unvisited.remove(cur)
-    pass
+
+    for n in routers[find_router_for_ip(routers, cur)]["connections"]:
+        if n in unvisited:
+            n_dist = distance_to_neighbors(routers, cur, n)
+            alt_dist = dist[cur] + n_dist
+
+            if alt_dist < dist[n]:
+                dist[n] = alt_dist
+                parent[n] = cur
+    
+    
+    path = []
+    cur = dest_ip
+    while cur != src_ip:
+        path.append(cur)
+        current = parent[cur]
+    if path:
+        path.append(current)
+        path.reverse()
+    
+    return path
 
 #------------------------------
 # DO NOT MODIFY BELOW THIS LINE
