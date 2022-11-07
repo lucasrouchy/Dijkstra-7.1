@@ -29,8 +29,10 @@ def find_router_for_ip(routers, ip):
 
 def distance_to_neighbors(routers, current, neighbor):
     cur = routers[current]
+    # getting connected ips
     cur_connections = cur['connections']
     cur_neighbor = cur_connections[neighbor]
+    # getting administrative distance
     n_dist = cur_neighbor['ad']
     return n_dist
 
@@ -104,7 +106,7 @@ def dijkstras_shortest_path(routers, src_ip, dest_ip):
 
     
     while unvisited:
-        # current node is the node with the shortest distance that in the unvisited set.
+        # current node is the node with the shortest distance in the unvisited set.
         current = min(unvisited, key=dist.get)
         unvisited.remove(current)
         
@@ -120,6 +122,7 @@ def dijkstras_shortest_path(routers, src_ip, dest_ip):
     
     
     path = []
+    # making sure the current ip is the destination ip 
     current = dest_ip
     while current != src_ip:
         path.append(current)
