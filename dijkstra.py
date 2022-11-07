@@ -27,8 +27,8 @@ def find_router_for_ip(routers, ip):
         if ips_same_subnet(ip_value, ip, mask_value['netmask']):
             return ip_value
 
-def distance_to_neighbors(routers, cur, neighbor):
-    cur_info = routers[cur]
+def distance_to_neighbors(routers, current, neighbor):
+    cur_info = routers[current]
     cur_connections = cur_info['connections']
     cur_neighbor = cur_connections[neighbor]
     n_dist = cur_neighbor['ad']
@@ -99,29 +99,31 @@ def dijkstras_shortest_path(routers, src_ip, dest_ip):
         parent[r] = None
         dist[r] = math.inf  
         unvisited.add(r)
-    
+    # start with dist of 0
     dist[src_ip] = 0
 
+    
     while unvisited:
-
-        cur = min(unvisited, key=dist.get)
-        unvisited.remove(cur)
-
-    for n in routers[find_router_for_ip(routers, cur)]["connections"]:
-        if n in unvisited:
-            n_dist = distance_to_neighbors(routers, cur, n)
-            alt_dist = dist[cur] + n_dist
-
-            if alt_dist < dist[n]:
-                dist[n] = alt_dist
-                parent[n] = cur
+        # current node is the node with the shortest distance that in the unvisited set.
+        current = min(unvisited, key=dist.get)
+        unvisited.remove(current)
+        
+        for n in routers[current]["connections"]:
+            if n in unvisited:
+                # shortest path
+                n_dist = distance_to_neighbors(routers, current, n)
+                alt_dist = dist[current] + n_dist
+                # if the alternative distance is smaller then update new shortest path.
+                if alt_dist < dist[n]:
+                    dist[n] = alt_dist
+                    parent[n] = current
     
     
     path = []
-    cur = dest_ip
-    while cur != src_ip:
-        path.append(cur)
-        current = parent[cur]
+    current = dest_ip
+    while current != src_ip:
+        path.append(current)
+        current = parent[current]
     if path:
         path.append(current)
         path.reverse()
